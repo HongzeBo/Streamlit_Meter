@@ -71,7 +71,7 @@ def main(input_file, model_file,id):
     # rf_use.feature_importances_
 
     # path for output file
-    output_file = 'Streamlit_Meter/downloads/'+id+'_output.xlsx'
+    output_file = 'downloads/'+id+'_output.xlsx'
 
     # detect with type of model is used
     output_col = 0
@@ -101,7 +101,7 @@ def main(input_file, model_file,id):
     model_index = data_name.index(model_name)
 
     # import experimental calibration data
-    input_file_exp = 'Streamlit_Meter/allexps_all.xlsx'
+    input_file_exp = 'allexps_all.xlsx'
     data_exp = import_excel_matrix(input_file_exp, model_index)
 
     # set up plot parameters
@@ -304,7 +304,7 @@ tab1, tab2 = st.tabs(['**Calc**', '**Info**'])
 with tab1:
     st.write(
         '***Ranking of all possible hygro-thermobarometer pairs. RMSE are averaged from 100 trials of calibration of 80% train data and 20% test data.***')
-    meter_rank = pd.read_excel('Streamlit_Meter/meter_rank.xlsx', sheet_name='Sheet1')
+    meter_rank = pd.read_excel('meter_rank.xlsx', sheet_name='Sheet1')
     # print(meter_rank)
     st.dataframe(meter_rank, hide_index=True)
 
@@ -321,7 +321,7 @@ with tab1:
     st.subheader('***Step 2: Which liquid/mineral pair do you want to use?***')
 
     question2 = st.selectbox('', list(meter_rank['Pairs']))
-    model_file = "Streamlit_Meter/rfmodels/" + ex_model + "_" + question2
+    model_file = "rfmodels/" + ex_model + "_" + question2
 
 
     # @st.cache_data
@@ -329,7 +329,7 @@ with tab1:
     #     return df.to_csv().encode("utf-8")
 
 
-    # Template_input = pd.read_excel('Streamlit_Meter/Template_input.xlsx')
+    # Template_input = pd.read_excel('Template_input.xlsx')
     # csv = convert_df(Template_input)
 
     # st.subheader('***Step 3: Please download the template***')
@@ -341,7 +341,7 @@ with tab1:
     # )
 
     st.subheader('***Step 3: Please download the template***')
-    with open('Streamlit_Meter/Template_input.xlsx', 'rb') as my_file:
+    with open('Template_input.xlsx', 'rb') as my_file:
         st.download_button(label='**Template_input.xlsx**', data=my_file, file_name='Template_input.xlsx',
                            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
@@ -351,15 +351,15 @@ with tab1:
     if upload_file:
         import uuid
         id = str(uuid.uuid1())
-        with open(os.path.join("Streamlit_Meter/uploads", id+'_'+upload_file.name), "wb") as f:
+        with open(os.path.join("uploads", id+'_'+upload_file.name), "wb") as f:
             f.write(upload_file.getbuffer())
 
         with st.spinner('***Calculation…***'):
             if upload_file:
-                copy_files('Streamlit_Meter/downloads',id)
-                f1, f2, f3 = main(os.path.join("Streamlit_Meter/uploads", id+'_'+upload_file.name), model_file,id)
+                copy_files('downloads',id)
+                f1, f2, f3 = main(os.path.join("uploads", id+'_'+upload_file.name), model_file,id)
                 st.success('***Calculation is complete***')
-                with open("Streamlit_Meter/downloads/"+id+"_output.xlsx", "rb") as file:
+                with open("downloads/"+id+"_output.xlsx", "rb") as file:
                     st.subheader('***Step 5: Please download your results***')
                     st.download_button(label='**Template_output.xlsx**', data=file, file_name='Template_output.xlsx',
                                        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -378,4 +378,4 @@ with tab2:
     with col1:
         st.subheader('***Effect of Water on Magmatic Evolution Systematics, 2024***')
     with col2:
-        st.image('Streamlit_Meter/dog.png')
+        st.image('dog.png')
