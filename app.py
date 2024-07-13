@@ -299,7 +299,6 @@ def copy_files(path,id):  # 定义函数名称
 
 st.title('Hygro-Thermobarometer by Bo and Jagoutz 2024')
 
-st.subheader('hi')
 tab1, tab2 = st.tabs(['**Calc**', '**Info**'])
 with tab1:
     st.write(
