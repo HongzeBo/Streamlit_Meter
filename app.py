@@ -60,7 +60,7 @@ def main(input_file, model_file,id):
         X[:, 10:] = X[:, 10:] / np.sum(X[:, 10:], axis=1, keepdims=True) * 100
 
     # choose the random forest model
-    # model_file = r'thermobarohygro/hygro_liq-afterplgin'
+    # model_file = r'rfmodels/hygro_liq-afterplgin'
     rf_use = joblib.load(model_file)
 
     # run the model to give predicted values
@@ -71,7 +71,7 @@ def main(input_file, model_file,id):
     # rf_use.feature_importances_
 
     # path for output file
-    output_file = 'pt_st/StreamLit/downloads/'+id+'_output.xlsx'
+    output_file = 'Streamlit_Meter/downloads/'+id+'_output.xlsx'
 
     # detect with type of model is used
     output_col = 0
@@ -101,7 +101,7 @@ def main(input_file, model_file,id):
     model_index = data_name.index(model_name)
 
     # import experimental calibration data
-    input_file_exp = 'pt_st/StreamLit/allexps_all.xlsx'
+    input_file_exp = 'Streamlit_Meter/allexps_all.xlsx'
     data_exp = import_excel_matrix(input_file_exp, model_index)
 
     # set up plot parameters
@@ -124,7 +124,7 @@ def main(input_file, model_file,id):
     # st.pyplot(fig1)
 
     # plot Fig.2: Haker diagram
-    fig2 = plt.figure(figsize=(16,12))
+    fig2 = plt.figure(figsize=(10,7.5))
 
     plt.subplot(3, 3, 1)
     plt.scatter(data_exp[:, 0], data_exp[:, 1], linewidths=0, color='grey', alpha=alpha, label='Calibration Data')
@@ -204,7 +204,7 @@ def main(input_file, model_file,id):
     # if model contains two components, plot Fig.3: Haker diagram
     fig3 = None
     if X_wid == 20:
-        fig3 = plt.figure(3)
+        fig3 = plt.figure(figsize=(10,7.5))
 
         plt.subplot(3, 3, 1)
         plt.scatter(data_exp[:, 10], data_exp[:, 11], linewidths=0, color='grey', alpha=alpha, label='Calibration Data')
@@ -299,18 +299,19 @@ def copy_files(path,id):  # 定义函数名称
 
 st.title('Hygro-Thermobarometer by Bo and Jagoutz 2024')
 
+
 tab1, tab2 = st.tabs(['**Calc**', '**Info**'])
 with tab1:
     st.write(
         '***Ranking of all possible hygro-thermobarometer pairs. RMSE are averaged from 100 trials of calibration of 80% train data and 20% test data.***')
-    meter_rank = pd.read_excel('pt_st/StreamLit/meter_rank.xlsx', sheet_name='Sheet1')
+    meter_rank = pd.read_excel('Streamlit_Meter/meter_rank.xlsx', sheet_name='Sheet1')
     # print(meter_rank)
     st.dataframe(meter_rank, hide_index=True)
 
     st.subheader('***Step1: What do you want to predict?***')
 
-    question1 = st.selectbox('', ['H2O', 'Temperature', 'Pressure'])
-    if question1 == 'H2O':
+    question1 = st.selectbox('', ['Water', 'Temperature', 'Pressure'])
+    if question1 == 'Water':
         ex_model = 'hygro'
     elif question1 == 'Pressure':
         ex_model = 'baro'
@@ -320,26 +321,45 @@ with tab1:
     st.subheader('***Step 2: Which liquid/mineral pair do you want to use?***')
 
     question2 = st.selectbox('', list(meter_rank['Pairs']))
-    model_file = "pt_st/StreamLit/thermobarohygro/" + ex_model + "_" + question2
+    model_file = "Streamlit_Meter/rfmodels/" + ex_model + "_" + question2
+
+
+    # @st.cache_data
+    # def convert_df(df):
+    #     return df.to_csv().encode("utf-8")
+
+
+    # Template_input = pd.read_excel('Streamlit_Meter/Template_input.xlsx')
+    # csv = convert_df(Template_input)
+
+    # st.subheader('***Step 3: Please download the template***')
+    # st.download_button(
+    #     label="**Template_input.csv**",
+    #     data=csv,
+    #     file_name="Template_input.csv",
+    #     mime="text/csv",
+    # )
 
     st.subheader('***Step 3: Please download the template***')
-    with open('pt_st/StreamLit/Template_input.xlsx', 'rb') as my_file:
+    with open('Streamlit_Meter/Template_input.xlsx', 'rb') as my_file:
         st.download_button(label='**Template_input.xlsx**', data=my_file, file_name='Template_input.xlsx',
                            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
     st.subheader('***Step 4: Please upload your data using the template***')
     upload_file = st.file_uploader('')
+
     if upload_file:
         import uuid
         id = str(uuid.uuid1())
-        with open(os.path.join("pt_st/StreamLit/uploads", id+'_'+upload_file.name), "wb") as f:
+        with open(os.path.join("Streamlit_Meter/uploads", id+'_'+upload_file.name), "wb") as f:
             f.write(upload_file.getbuffer())
 
         with st.spinner('***Calculation…***'):
             if upload_file:
-                copy_files('pt_st/StreamLit/downloads',id)
-                f1, f2, f3 = main(os.path.join("pt_st/StreamLit/uploads", id+'_'+upload_file.name), model_file,id)
+                copy_files('Streamlit_Meter/downloads',id)
+                f1, f2, f3 = main(os.path.join("Streamlit_Meter/uploads", id+'_'+upload_file.name), model_file,id)
                 st.success('***Calculation is complete***')
-                with open("pt_st/StreamLit/downloads/"+id+"_output.xlsx", "rb") as file:
+                with open("Streamlit_Meter/downloads/"+id+"_output.xlsx", "rb") as file:
                     st.subheader('***Step 5: Please download your results***')
                     st.download_button(label='**Template_output.xlsx**', data=file, file_name='Template_output.xlsx',
                                        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -358,4 +378,4 @@ with tab2:
     with col1:
         st.subheader('***Effect of Water on Magmatic Evolution Systematics, 2024***')
     with col2:
-        st.image('pt_st/StreamLit/dog.png')
+        st.image('Streamlit_Meter/dog.png')
