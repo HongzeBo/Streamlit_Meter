@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time    : 2024/7/9 23:45
-# @Author  : Ken
-# @Software: PyCharm
+# @Author  : Bo and Ken
+
 import random
 
 import numpy as np
@@ -284,15 +284,15 @@ def main(input_file, model_file,id):
     return fig1, fig2, fig3
 
 
-import os, shutil  # 导入模块
+import os, shutil  
 
 
-def copy_files(path,id):  # 定义函数名称
-    for foldName, subfolders, filenames in os.walk(path):  # 用os.walk方法取得path路径下的文件夹路径，子文件夹名，所有文件名
-        for filename in filenames:  # 遍历列表下的所有文件名
-            if filename.endswith('Template_output.xlsx'):  # 当文件名以.txt后缀结尾时
-                new_name = filename.replace('Template_output.xlsx', id+'_output.xlsx')  # 为文件赋予新名字
-                shutil.copyfile(os.path.join(foldName, filename), os.path.join(foldName, new_name))  # 复制并重命名文件
+def copy_files(path,id):  
+    for foldName, subfolders, filenames in os.walk(path):  
+        for filename in filenames:  
+            if filename.endswith('Template_output.xlsx'):  
+                new_name = filename.replace('Template_output.xlsx', id+'_output.xlsx')  
+                shutil.copyfile(os.path.join(foldName, filename), os.path.join(foldName, new_name))  
                 print(filename, "copied as", new_name)
 
 
@@ -309,10 +309,10 @@ with tab1:
 
     st.subheader('***Step1: What do you want to predict?***')
 
-    question1 = st.selectbox('', ['Water', 'Temperature', 'Pressure'])
-    if question1 == 'Water':
+    question1 = st.selectbox('', ['Water (wt.%)', 'Temperature (°C)', 'Pressure (kbar)'])
+    if question1 == 'Water (wt.%)':
         ex_model = 'hygro'
-    elif question1 == 'Pressure':
+    elif question1 == 'Pressure (kbar)':
         ex_model = 'baro'
     else:
         ex_model = 'thermo'
