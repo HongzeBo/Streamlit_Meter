@@ -17,27 +17,44 @@ import os
 import shutil         
 
 # calibration range inpolygon detection
-def inpoly_detector(data_use: np.ndarray) -> np.ndarray:
+def inpoly_detector(data_use: np.ndarray,
+                    book: str = 'allexps_all.xlsx',
+                    sheet_index: int = 2) -> np.ndarray:
     """
-    Vectorised rewrite of the original MATLAB inpoly() function.
-    Returns a Boolean array (True = inside polygon for *all* projections).
+    Returns an int array (1 = inside polygon for all projections, 0 = outside).
+
+    Parameters
+    ----------
+    data_use : np.ndarray
+        Your sample matrix (rows × ≥9 cols).
+    book : str
+        Path to allexps_all.xlsx (default assumes it sits beside app.py).
+    sheet_index : int
+        Zero‑based index of the worksheet that holds the melt data.
+        The third sheet ⇒ 2.
     """
-    # experimental “melt” data are stored in the sheet ‘liq-afterplgin’
-    data_exp = pd.read_excel('allexps_all.xlsx',
-                             sheet_name='liq-afterplgin',
+    import pandas as pd
+    from matplotlib.path import Path
+    from scipy.spatial import ConvexHull
+
+    # --- read experimental “melt” data from the 3rd worksheet ---------------
+    data_exp = pd.read_excel(book,
+                             sheet_name=sheet_index,   # ← 3rd sheet
                              engine='openpyxl').to_numpy()
 
-    # columns to project (MATLAB [2 3 4 6 7 8 9] → 0‑based Python)
-    proj_cols = [1, 2, 3, 5, 6, 7, 8]
+    # --- polygon‑inclusion test (vectorised) --------------------------------
+    proj_cols = [1, 2, 3, 5, 6, 7, 8]      # MATLAB [2 3 4 6 7 8 9] → 0‑based
     inside = np.ones(len(data_use), dtype=bool)
 
     for i in proj_cols:
         pts_exp = np.column_stack((data_exp[:, 0], data_exp[:, i]))
-        hull = ConvexHull(pts_exp)
-        poly_path = Path(pts_exp[hull.vertices])          # convex hull polygon
-        inside &= poly_path.contains_points(
-                     np.column_stack((data_use[:, 0], data_use[:, i])))
-    return inside.astype(int)       # 1 = in polygon, 0 = out
+        hull    = ConvexHull(pts_exp)
+        poly    = Path(pts_exp[hull.vertices])
+        inside &= poly.contains_points(
+                      np.column_stack((data_use[:, 0], data_use[:, i])))
+
+    return inside.astype(int)
+
 
 # run plag-sat classifier
 def run_plgsat_classifier(X: np.ndarray) -> np.ndarray:
