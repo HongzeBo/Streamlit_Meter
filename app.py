@@ -14,6 +14,7 @@ import xlrd
 import pandas as pd
 import streamlit as st
 import os
+import shutil         
 
 # calibration range inpolygon detection
 def inpoly_detector(data_use: np.ndarray) -> np.ndarray:
@@ -427,41 +428,32 @@ with tab_plgsat:
         with open(up_path, 'wb') as f:
             f.write(upl_file.getbuffer())
 
-        with st.spinner('***Running classifier & polygon test…***'):
-            # read data
-            df_in = pd.read_excel(upl_file, engine='openpyxl')
+        with st.spinner('***Running classifier & polygon test…***'):            
             
-            # --- convert every column to numeric, coercing errors to NaN --------------
-            df_num = df_in.apply(pd.to_numeric, errors='coerce')
-            
-            # if anything could not be converted, stop and tell the user
-            if df_num.isna().any().any():
-                st.error(
-                    '❌  Non‑numeric values detected in your sheet.  \n'
-                    'Please make sure every cell that should be a number **is** a number, '
-                    'then re‑upload.'
-                )
-                st.stop()
-            
-            # otherwise go ahead
-            X = df_num.to_numpy(float)
-
-
-            # RF classifier (0 / 1)
-            out_rf = run_plgsat_classifier(X)
-
-            # in‑polygon test (0 / 1)
-            out_poly = inpoly_detector(X)
-
-            # build result sheet
-            df_out = df_in.copy()
-            df_out['plgsat_classifier'] = out_rf
-            df_out['inpolygon']         = out_poly
-
-            # save to downloads
+            # 1) make a working copy of the user’s upload so we can append results later
             dl_name = f'{sess_id}_plgsat_output.xlsx'
             dl_path = os.path.join('downloads', dl_name)
-            df_out.to_excel(dl_path, index=False)
+            shutil.copyfile(up_path, dl_path)    # start the output file as a clone of the input
+            
+            # 2) read the numeric matrix with the project helper (skips the two header rows)
+            X = import_excel_matrix(up_path, 0)  # <-- uses xlrd, no dtype issues
+            
+            # 3) **renormalise to 100 wt.%** exactly like the main Calc workflow
+            X_wid = X.shape[1]
+            if X_wid == 10:
+                X = X / np.sum(X, axis=1, keepdims=True) * 100
+            elif X_wid == 20:
+                X[:, :10]  = X[:, :10]  / np.sum(X[:, :10],  axis=1, keepdims=True) * 100
+                X[:, 10:]  = X[:, 10:]  / np.sum(X[:, 10:],  axis=1, keepdims=True) * 100
+            
+            # 4) run the two classifiers
+            out_rf   = run_plgsat_classifier(X).reshape(-1, 1)   # column vector
+            out_poly = inpoly_detector(X).reshape(-1, 1)
+            
+            # 5) append the results to the cloned workbook
+            save_excel(out_rf,   X_wid,     dl_path)             # first new column
+            save_excel(out_poly, X_wid + 1, dl_path)             # second new column
+
 
         st.success('***Calculation is complete***')
 
