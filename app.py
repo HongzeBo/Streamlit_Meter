@@ -430,7 +430,22 @@ with tab_plgsat:
         with st.spinner('***Running classifier & polygon test…***'):
             # read data
             df_in = pd.read_excel(upl_file, engine='openpyxl')
-            X     = df_in.to_numpy(float)
+            
+            # --- convert every column to numeric, coercing errors to NaN --------------
+            df_num = df_in.apply(pd.to_numeric, errors='coerce')
+            
+            # if anything could not be converted, stop and tell the user
+            if df_num.isna().any().any():
+                st.error(
+                    '❌  Non‑numeric values detected in your sheet.  \n'
+                    'Please make sure every cell that should be a number **is** a number, '
+                    'then re‑upload.'
+                )
+                st.stop()
+            
+            # otherwise go ahead
+            X = df_num.to_numpy(float)
+
 
             # RF classifier (0 / 1)
             out_rf = run_plgsat_classifier(X)
