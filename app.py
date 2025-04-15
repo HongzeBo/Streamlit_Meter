@@ -15,6 +15,33 @@ import pandas as pd
 import streamlit as st
 import os
 
+# calibration range inpolygon detection
+def inpoly_detector(data_use: np.ndarray) -> np.ndarray:
+    """
+    Vectorised rewrite of the original MATLAB inpoly() function.
+    Returns a Boolean array (True = inside polygon for *all* projections).
+    """
+    # experimental “melt” data are stored in the sheet ‘liq-afterplgin’
+    data_exp = pd.read_excel('allexps_all.xlsx',
+                             sheet_name='liq-afterplgin',
+                             engine='openpyxl').to_numpy()
+
+    # columns to project (MATLAB [2 3 4 6 7 8 9] → 0‑based Python)
+    proj_cols = [1, 2, 3, 5, 6, 7, 8]
+    inside = np.ones(len(data_use), dtype=bool)
+
+    for i in proj_cols:
+        pts_exp = np.column_stack((data_exp[:, 0], data_exp[:, i]))
+        hull = ConvexHull(pts_exp)
+        poly_path = Path(pts_exp[hull.vertices])          # convex hull polygon
+        inside &= poly_path.contains_points(
+                     np.column_stack((data_use[:, 0], data_use[:, i])))
+    return inside.astype(int)       # 1 = in polygon, 0 = out
+
+# run plag-sat classifier
+def run_plgsat_classifier(X: np.ndarray) -> np.ndarray:
+    rf_use_plgsat = joblib.load(r'rfmodels/classifier_plgsat')
+    return rf_use_plgsat.predict(X[:, :10])               # returns 0 / 1
 
 # import data as numpy matrix from excel file
 def import_excel_matrix(path, i):
@@ -301,8 +328,9 @@ def copy_files(path,id):
 
 st.title('Hygro-Thermobarometer by Bo and Jagoutz 2024')
 
-tab1, tab2 = st.tabs(['**Calc**', '**Info**'])
-with tab1:
+tab_calc, tab_plgsat, tab_info = st.tabs(['**Calc**', '**Plg‑sat.**', '**Info**'])  # :contentReference[oaicite:0]{index=0}
+
+with tab_calc:
     st.write(
         '***Ranking of all possible hygro-thermobarometer pairs. RMSE are averaged from 100 trials of calibration of 80% train data and 20% test data.***')
     meter_rank = pd.read_excel('meter_rank.xlsx', sheet_name='Sheet1')
@@ -374,7 +402,68 @@ with tab1:
                 if f3:
                     st.write('**Figure 3: Major elemental covariations of  Component 2**')
                     st.pyplot(f3)
-with tab2:
+
+# ─────────────────────────────  “Plg‑sat.” TAB  ─────────────────────────────
+with tab_plgsat:
+
+    st.write('***Plagioclase‑saturation checker***')
+
+    # ---------- Step1 – download template ------------------------------------
+    st.subheader('***Step1: Please download the template***')
+    with open('Template_input_plgsat.xlsx', 'rb') as tpl:      # note new file
+        st.download_button(label='**Template_input_plgsat.xlsx**',
+                           data=tpl,
+                           file_name='Template_input_plgsat.xlsx',
+                           mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    # ---------- Step2 – upload data ------------------------------------------
+    st.subheader('***Step2: Please upload your data using the template***')
+    upl_file = st.file_uploader('', type=['xlsx'])
+
+    if upl_file:
+        import uuid, os
+        sess_id = str(uuid.uuid4())
+        up_path = os.path.join('uploads', f'{sess_id}_{upl_file.name}')
+        with open(up_path, 'wb') as f:
+            f.write(upl_file.getbuffer())
+
+        with st.spinner('***Running classifier & polygon test…***'):
+            # read data
+            df_in = pd.read_excel(upl_file, engine='openpyxl')
+            X     = df_in.to_numpy(float)
+
+            # RF classifier (0 / 1)
+            out_rf = run_plgsat_classifier(X)
+
+            # in‑polygon test (0 / 1)
+            out_poly = inpoly_detector(X)
+
+            # build result sheet
+            df_out = df_in.copy()
+            df_out['plgsat_classifier'] = out_rf
+            df_out['inpolygon']         = out_poly
+
+            # save to downloads
+            dl_name = f'{sess_id}_plgsat_output.xlsx'
+            dl_path = os.path.join('downloads', dl_name)
+            df_out.to_excel(dl_path, index=False)
+
+        st.success('***Calculation is complete***')
+
+        # ---------- Step3 – download results ---------------------------------
+        st.subheader('***Step3: Please download your results***')
+        with open(dl_path, 'rb') as fh:
+            st.download_button(label='**Template_output_plgsat.xlsx**',
+                               data=fh,
+                               file_name='Template_output_plgsat.xlsx',
+                               mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+        # quick stats (optional, matches Calc tab style)
+        st.write(f'Rows flagged by the RF model: **{out_rf.sum()}**')
+        st.write(f'Rows inside every convex‑hull projection: **{out_poly.sum()}**')
+
+
+with tab_info:
     col1, col2 = st.columns([6, 4])
     with col1:
         st.subheader('***Effect of Water on Magmatic Evolution Systematics, 2024***')
