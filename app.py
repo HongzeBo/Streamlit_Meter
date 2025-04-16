@@ -448,11 +448,10 @@ if upl_file:
         f.write(upl_file.getbuffer())
 
     with st.spinner('***Running classifier & polygon test…***'):            
-        # 1) First copy the template file (not the uploaded file) to preserve formatting
-        template_path = 'Template_input_plgsat.xlsx'
+        # 1) Copy the template output file to preserve formatting
+        template_output_path = 'downloads/Template_output_plgsat.xlsx'
         dl_name = f'{sess_id}_plgsat_output.xlsx'
         dl_path = os.path.join('downloads', dl_name)
-        shutil.copyfile(template_path, dl_path)    # Use the original template instead of the uploaded file
         
         # 2) read the numeric matrix from the uploaded file
         X = import_excel_matrix(up_path, 0)
