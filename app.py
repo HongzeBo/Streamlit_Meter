@@ -441,6 +441,8 @@ with tab_plgsat:
 # In the plg-sat tab section, replace the current file handling code with this:
 
 if upl_file:
+    st.subheader('***Step3: Testing whether the uploaded liquid composition is (1) Plag saturated and (2) within the calibration range of our experimental data***')
+  
     import uuid, os
     sess_id = str(uuid.uuid4())
     up_path = os.path.join('uploads', f'{sess_id}_{upl_file.name}')
@@ -486,7 +488,7 @@ if upl_file:
         st.success('***Calculation is complete***')
 
         # ---------- Step3 – download results ---------------------------------
-        st.subheader('***Step3: Please download your results***')
+        st.subheader('***Step4: Please download your results***')
         with open(dl_path, 'rb') as fh:
             st.download_button(label='**Template_output_plgsat.xlsx**',
                                data=fh,
