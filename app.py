@@ -453,6 +453,13 @@ if upl_file:
         dl_name = f'{sess_id}_plgsat_output.xlsx'
         dl_path = os.path.join('downloads', dl_name)
         
+        # Make sure the template output file exists, then copy it
+        if os.path.exists(template_output_path):
+            shutil.copyfile(template_output_path, dl_path)
+        else:
+            st.error("Template output file not found. Using uploaded file as base.")
+            shutil.copyfile(up_path, dl_path)
+        
         # 2) read the numeric matrix from the uploaded file
         X = import_excel_matrix(up_path, 0)
         
