@@ -425,7 +425,7 @@ with tab_calc:
 with tab_plgsat:
 
     st.write("""
-    # Before using the Liq-afterplgin hygrometer, two conditions must be met:
+    Before using the Liq-afterplgin hygrometer, two conditions must be met:
 
     1) Input liquid compositions must fall within the calibration data polygons in SiO<sub>2</sub> vs. Al<sub>2</sub>O<sub>3</sub>, FeO, TiO<sub>2</sub>, and MgO Harker Diagrams.
 
