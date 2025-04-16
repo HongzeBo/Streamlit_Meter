@@ -442,66 +442,66 @@ with tab_plgsat:
     st.subheader('***Step2: Please upload your data using the template***')
     upl_file = st.file_uploader('', type=['xlsx'])
 
-  # In the plg-sat tab section, replace the current file handling code with this:
-  
-  if upl_file:
-      st.subheader('***Step3: Testing whether the uploaded liquid composition is (1) Plag saturated and (2) within the calibration range of our experimental data***')
+    # In the plg-sat tab section, replace the current file handling code with this:
     
-      import uuid, os
-      sess_id = str(uuid.uuid4())
-      up_path = os.path.join('uploads', f'{sess_id}_{upl_file.name}')
-      with open(up_path, 'wb') as f:
-          f.write(upl_file.getbuffer())
-  
-      with st.spinner('***Running classifier & polygon test…***'):            
-          # 1) Copy the template output file to preserve formatting
-          template_output_path = 'downloads/Template_output_plgsat.xlsx'
-          dl_name = f'{sess_id}_plgsat_output.xlsx'
-          dl_path = os.path.join('downloads', dl_name)
-          
-          # Make sure the template output file exists, then copy it
-          if os.path.exists(template_output_path):
-              shutil.copyfile(template_output_path, dl_path)
-          else:
-              st.error("Template output file not found. Using uploaded file as base.")
-              shutil.copyfile(up_path, dl_path)
-          
-          # 2) read the numeric matrix from the uploaded file
-          X = import_excel_matrix(up_path, 0)
-          
-          # 3) renormalise to 100 wt.%
-          X_wid = X.shape[1]
-          if X_wid == 10:
-              X = X / np.sum(X, axis=1, keepdims=True) * 100
-          elif X_wid == 20:
-              X[:, :10]  = X[:, :10]  / np.sum(X[:, :10],  axis=1, keepdims=True) * 100
-              X[:, 10:]  = X[:, 10:]  / np.sum(X[:, 10:],  axis=1, keepdims=True) * 100
-          
-          # 4) Save the input data first to the template copy
-          save_excel(X, 0, dl_path)
-          
-          # 5) run the two classifiers
-          out_rf   = run_plgsat_classifier(X).reshape(-1, 1)
-          out_poly = inpoly_detector(X).reshape(-1, 1)
-          
-          # 6) append the results to the workbook
-          save_excel(out_rf,   X_wid,     dl_path)
-          save_excel(out_poly, X_wid + 1, dl_path)
-  
-  
-          st.success('***Calculation is complete***')
-  
-          # ---------- Step3 – download results ---------------------------------
-          st.subheader('***Step4: Please download your results***')
-          with open(dl_path, 'rb') as fh:
-              st.download_button(label='**Template_output_plgsat.xlsx**',
-                                 data=fh,
-                                 file_name='Template_output_plgsat.xlsx',
-                                 mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  
-          # # quick stats (optional, matches Calc tab style)
-          # st.write(f'Rows flagged by the RF model: **{out_rf.sum()}**')
-          # st.write(f'Rows inside every convex‑hull projection: **{out_poly.sum()}**')
+    if upl_file:
+        st.subheader('***Step3: Testing whether the uploaded liquid composition is (1) Plag saturated and (2) within the calibration range of our experimental data***')
+      
+        import uuid, os
+        sess_id = str(uuid.uuid4())
+        up_path = os.path.join('uploads', f'{sess_id}_{upl_file.name}')
+        with open(up_path, 'wb') as f:
+            f.write(upl_file.getbuffer())
+    
+        with st.spinner('***Running classifier & polygon test…***'):            
+            # 1) Copy the template output file to preserve formatting
+            template_output_path = 'downloads/Template_output_plgsat.xlsx'
+            dl_name = f'{sess_id}_plgsat_output.xlsx'
+            dl_path = os.path.join('downloads', dl_name)
+            
+            # Make sure the template output file exists, then copy it
+            if os.path.exists(template_output_path):
+                shutil.copyfile(template_output_path, dl_path)
+            else:
+                st.error("Template output file not found. Using uploaded file as base.")
+                shutil.copyfile(up_path, dl_path)
+            
+            # 2) read the numeric matrix from the uploaded file
+            X = import_excel_matrix(up_path, 0)
+            
+            # 3) renormalise to 100 wt.%
+            X_wid = X.shape[1]
+            if X_wid == 10:
+                X = X / np.sum(X, axis=1, keepdims=True) * 100
+            elif X_wid == 20:
+                X[:, :10]  = X[:, :10]  / np.sum(X[:, :10],  axis=1, keepdims=True) * 100
+                X[:, 10:]  = X[:, 10:]  / np.sum(X[:, 10:],  axis=1, keepdims=True) * 100
+            
+            # 4) Save the input data first to the template copy
+            save_excel(X, 0, dl_path)
+            
+            # 5) run the two classifiers
+            out_rf   = run_plgsat_classifier(X).reshape(-1, 1)
+            out_poly = inpoly_detector(X).reshape(-1, 1)
+            
+            # 6) append the results to the workbook
+            save_excel(out_rf,   X_wid,     dl_path)
+            save_excel(out_poly, X_wid + 1, dl_path)
+    
+    
+            st.success('***Calculation is complete***')
+    
+            # ---------- Step3 – download results ---------------------------------
+            st.subheader('***Step4: Please download your results***')
+            with open(dl_path, 'rb') as fh:
+                st.download_button(label='**Template_output_plgsat.xlsx**',
+                                   data=fh,
+                                   file_name='Template_output_plgsat.xlsx',
+                                   mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    
+            # # quick stats (optional, matches Calc tab style)
+            # st.write(f'Rows flagged by the RF model: **{out_rf.sum()}**')
+            # st.write(f'Rows inside every convex‑hull projection: **{out_poly.sum()}**')
 
 
 with tab_info:
