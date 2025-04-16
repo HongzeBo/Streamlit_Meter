@@ -438,38 +438,43 @@ with tab_plgsat:
     st.subheader('***Step2: Please upload your data using the template***')
     upl_file = st.file_uploader('', type=['xlsx'])
 
-    if upl_file:
-        import uuid, os
-        sess_id = str(uuid.uuid4())
-        up_path = os.path.join('uploads', f'{sess_id}_{upl_file.name}')
-        with open(up_path, 'wb') as f:
-            f.write(upl_file.getbuffer())
+# In the plg-sat tab section, replace the current file handling code with this:
 
-        with st.spinner('***Running classifier & polygon test…***'):            
-            
-            # 1) make a working copy of the user’s upload so we can append results later
-            dl_name = f'{sess_id}_plgsat_output.xlsx'
-            dl_path = os.path.join('downloads', dl_name)
-            shutil.copyfile(up_path, dl_path)    # start the output file as a clone of the input
-            
-            # 2) read the numeric matrix with the project helper (skips the two header rows)
-            X = import_excel_matrix(up_path, 0)  # <-- uses xlrd, no dtype issues
-            
-            # 3) **renormalise to 100 wt.%** exactly like the main Calc workflow
-            X_wid = X.shape[1]
-            if X_wid == 10:
-                X = X / np.sum(X, axis=1, keepdims=True) * 100
-            elif X_wid == 20:
-                X[:, :10]  = X[:, :10]  / np.sum(X[:, :10],  axis=1, keepdims=True) * 100
-                X[:, 10:]  = X[:, 10:]  / np.sum(X[:, 10:],  axis=1, keepdims=True) * 100
-            
-            # 4) run the two classifiers
-            out_rf   = run_plgsat_classifier(X).reshape(-1, 1)   # column vector
-            out_poly = inpoly_detector(X).reshape(-1, 1)
-            
-            # 5) append the results to the cloned workbook
-            save_excel(out_rf,   X_wid,     dl_path)             # first new column
-            save_excel(out_poly, X_wid + 1, dl_path)             # second new column
+if upl_file:
+    import uuid, os
+    sess_id = str(uuid.uuid4())
+    up_path = os.path.join('uploads', f'{sess_id}_{upl_file.name}')
+    with open(up_path, 'wb') as f:
+        f.write(upl_file.getbuffer())
+
+    with st.spinner('***Running classifier & polygon test…***'):            
+        # 1) First copy the template file (not the uploaded file) to preserve formatting
+        template_path = 'Template_input_plgsat.xlsx'
+        dl_name = f'{sess_id}_plgsat_output.xlsx'
+        dl_path = os.path.join('downloads', dl_name)
+        shutil.copyfile(template_path, dl_path)    # Use the original template instead of the uploaded file
+        
+        # 2) read the numeric matrix from the uploaded file
+        X = import_excel_matrix(up_path, 0)
+        
+        # 3) renormalise to 100 wt.%
+        X_wid = X.shape[1]
+        if X_wid == 10:
+            X = X / np.sum(X, axis=1, keepdims=True) * 100
+        elif X_wid == 20:
+            X[:, :10]  = X[:, :10]  / np.sum(X[:, :10],  axis=1, keepdims=True) * 100
+            X[:, 10:]  = X[:, 10:]  / np.sum(X[:, 10:],  axis=1, keepdims=True) * 100
+        
+        # 4) Save the input data first to the template copy
+        save_excel(X, 0, dl_path)
+        
+        # 5) run the two classifiers
+        out_rf   = run_plgsat_classifier(X).reshape(-1, 1)
+        out_poly = inpoly_detector(X).reshape(-1, 1)
+        
+        # 6) append the results to the workbook
+        save_excel(out_rf,   X_wid,     dl_path)
+        save_excel(out_poly, X_wid + 1, dl_path)
 
 
         st.success('***Calculation is complete***')
