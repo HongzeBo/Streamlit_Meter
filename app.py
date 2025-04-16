@@ -427,9 +427,9 @@ with tab_plgsat:
     st.write("""
     Before using the Liq-afterplgin hygrometer, two conditions must be met:
 
-    1) Input liquid compositions must fall within the calibration data polygons in SiO<sub>2</sub> vs. Al<sub>2</sub>O<sub>3</sub>, FeO, TiO<sub>2</sub>, and MgO Harker Diagrams.
+    1) Input liquid compositions must fall within the calibration range of our experimental data compilation.
 
-    2) Input liquid compositions must be confirmed as plagioclase-saturated by our classification model (88.1% avg. accuracy).
+    2) Input liquid compositions must be confirmed as Plag-saturated by our classification model (88.1% avg. accuracy).
     """)
 
     # ---------- Step1 – download template ------------------------------------
