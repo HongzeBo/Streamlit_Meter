@@ -424,7 +424,13 @@ with tab_calc:
 # ─────────────────────────────  “Plg‑sat.” TAB  ─────────────────────────────
 with tab_plgsat:
 
-    st.write('***Plagioclase‑saturation checker***')
+    st.write("""
+    # Before using the Liq-afterplgin hygrometer, two conditions must be met:
+
+    1) Input liquid compositions must fall within the calibration data polygons in SiO<sub>2</sub> vs. Al<sub>2</sub>O<sub>3</sub>, FeO, TiO<sub>2</sub>, and MgO Harker Diagrams.
+
+    2) Input liquid compositions must be confirmed as plagioclase-saturated by our classification model (88.1% avg. accuracy).
+    """)
 
     # ---------- Step1 – download template ------------------------------------
     st.subheader('***Step1: Please download the template***')
@@ -495,9 +501,9 @@ if upl_file:
                                file_name='Template_output_plgsat.xlsx',
                                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-        # quick stats (optional, matches Calc tab style)
-        st.write(f'Rows flagged by the RF model: **{out_rf.sum()}**')
-        st.write(f'Rows inside every convex‑hull projection: **{out_poly.sum()}**')
+        # # quick stats (optional, matches Calc tab style)
+        # st.write(f'Rows flagged by the RF model: **{out_rf.sum()}**')
+        # st.write(f'Rows inside every convex‑hull projection: **{out_poly.sum()}**')
 
 
 with tab_info:
