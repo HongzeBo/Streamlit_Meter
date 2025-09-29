@@ -58,7 +58,7 @@ def inpoly_detector(data_use: np.ndarray,
 
 # run plag-sat classifier
 def run_plgsat_classifier(X: np.ndarray) -> np.ndarray:
-    rf_use_plgsat = joblib.load(r'rfmodels/classifier_plgsat')
+    rf_use_plgsat = joblib.load(r'rf_models_thermobarohygro/classifier_plgsat')
     return rf_use_plgsat.predict(X[:, :10])               # returns 0 / 1
 
 # import data as numpy matrix from excel file
@@ -107,7 +107,7 @@ def main(input_file, model_file,id):
         X[:, 10:] = X[:, 10:] / np.sum(X[:, 10:], axis=1, keepdims=True) * 100
 
     # choose the random forest model
-    # model_file = r'rfmodels/hygro_liq-afterplgin'
+    # model_file = r'rf_models_thermobarohygro/hygro_liq-afterplgin'
     rf_use = joblib.load(model_file)
 
     # run the model to give predicted values
@@ -368,7 +368,7 @@ with tab_calc:
     st.subheader('***Step 2: Which liquid/mineral pair do you want to use?***')
 
     question2 = st.selectbox('', list(meter_rank['Pairs']))
-    model_file = "rfmodels/" + ex_model + "_" + question2
+    model_file = "rf_models_thermobarohygro/" + ex_model + "_" + question2
 
 
     # @st.cache_data
