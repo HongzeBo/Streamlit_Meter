@@ -593,11 +593,8 @@ with tab_plgsat:
             save_excel(X, 0, dl_path)
             
             # 5) run the two classifiers
-      
-            with open(r'hybrid0616/hybrid_hygro_afterplgin.dill','rb') as f:
-                rf_use_hygro_hybrid = dill.load(f)
+            rf_use_hygro_hybrid = joblib.load(r'hybrid0616/hybrid_hygro_afterplgin.pkl')
             rf_use_hygro_baserf = joblib.load(r'hybrid0616/hybrid_hygro_baserf')
-            print(rf_use_hygro_baserf.predict(X))
             rf_use_plgsat = joblib.load(r'hybrid0616/hybrid_plg-classifier') 
 
             # classification of plg saturation results
@@ -629,15 +626,9 @@ with tab_plgsat:
             # output_mf = (rf_use_mf.predict(X)).reshape((length,1))
 
             # H2O results
-
-            output_hygro_hybrid = rf_use_hygro_hybrid.predict(X)
-
-            output_hygro_hybrid = rf_use_hygro_hybrid.predict(X)
-            output_hygro_hybrid = output_hygro_hybrid.reshape((length,1))
-            output_hygro_baserf = rf_use_hygro_baserf.predict(X)
-            output_hygro_baserf = output_hygro_baserf.reshape((length,1))
+            output_hygro_hybrid = (rf_use_hygro_hybrid.predict(X)).reshape((length,1))
+            output_hygro_baserf = (rf_use_hygro_baserf.predict(X)).reshape((length,1))
             output_hygro = np.where(output_hygro_baserf<1.5, output_hygro_baserf, output_hygro_hybrid)
-            output_hygro = np.where(output_hygro<0, output_hygro_baserf, output_hygro)
 
             # out_poly = inpoly_detector(X).reshape(-1, 1)
             
