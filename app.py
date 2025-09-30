@@ -559,8 +559,11 @@ with tab_plgsat:
             # output_mf = (rf_use_mf.predict(X)).reshape((length,1))
 
             # H2O results
-            output_hygro_hybrid = (rf_use_hygro_hybrid.predict(X)).reshape((length,1))
-            output_hygro_baserf = (rf_use_hygro_baserf.predict(X)).reshape((length,1))
+
+            output_hygro_hybrid = rf_use_hygro_hybrid.predict(X)
+            output_hygro_hybrid = output_hygro_hybrid.reshape((length,1))
+            output_hygro_baserf = rf_use_hygro_baserf.predict(X)
+            output_hygro_baserf = output_hygro_baserf.reshape((length,1))
             output_hygro = np.where(output_hygro_baserf<1.5, output_hygro_baserf, output_hygro_hybrid)
             output_hygro = np.where(output_hygro<0, output_hygro_baserf, output_hygro)
 
