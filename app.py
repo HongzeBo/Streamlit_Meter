@@ -14,7 +14,8 @@ import xlrd
 import pandas as pd
 import streamlit as st
 import os
-import shutil         
+import shutil 
+import dill
 
 # calibration range inpolygon detection
 def inpoly_detector(data_use: np.ndarray,
@@ -56,10 +57,54 @@ def inpoly_detector(data_use: np.ndarray,
     return inside.astype(int)
 
 
-# run plag-sat classifier
-def run_plgsat_classifier(X: np.ndarray) -> np.ndarray:
-    rf_use_plgsat = joblib.load(r'rf_models_thermobarohygro/classifier_plgsat')
-    return rf_use_plgsat.predict(X[:, :10])               # returns 0 / 1
+# # run plag-sat classifier
+# def run_plgsat_classifier(X: np.ndarray) -> np.ndarray:
+#     rf_use_plgsat = joblib.load(r'rf_models_thermobarohygro/classifier_plgsat')
+#     return rf_use_plgsat.predict(X[:, :10])               # returns 0 / 1
+
+def run_hybrid_hygrometer(X: np.ndarray) -> np.ndarray:
+    with open(r'hybrid0616/hybrid_hygro_afterplgin.dill','rb') as f:
+    rf_use_hygro_hybrid = dill.load(f)
+    rf_use_hygro_baserf = joblib.load(r'hybrid0616/hybrid_hygro_baserf')
+    rf_use_plgsat = joblib.load(r'hybrid0616/hybrid_plg-classifier') 
+
+    X = X[:, :10]
+
+    # classification of plg saturation results
+    output_plgsat_raw = rf_use_plgsat.predict(X)
+    length=len(X[:,0])
+    output_plgsat_raw =  output_plgsat_raw.reshape((length,1))
+    # print(output_plgsat_raw.shape)
+
+    # set Mg>=15 as non-Plg-sat, SiO2>60 data as Plg-sat
+    mask = X[:,5:6]>=15
+    output_plgsat_raw = np.where(mask, np.zeros((length,1)), output_plgsat_raw)
+
+    mask = X[:,0:1]>=60
+    output_plgsat = np.where(mask, np.ones((length,1)), output_plgsat_raw)
+    # print(output_plgsat.shape)
+
+    # applicability, 50 < SiO2 < 80
+    mask = (X[:,0:1]<=50) | (X[:,0:1]>=80)
+    output_idx = np.where(mask, np.zeros((length,1)), output_plgsat)
+    # print(output_idx.shape)
+
+    # # temperature results
+    # output_thermo = (rf_use_thermo.predict(X)).reshape((length,1))
+
+    # # pressure results 
+    # output_baro = (rf_use_baro.predict(X)).reshape((length,1))
+
+    # melt fraction results
+    output_mf = (rf_use_mf.predict(X)).reshape((length,1))
+
+    # H2O results
+    output_hygro_hybrid = (rf_use_hygro_hybrid.predict(X)).reshape((length,1))
+    output_hygro_baserf = (rf_use_hygro_baserf.predict(X)).reshape((length,1))
+    output_hygro = np.where(output_hygro_baserf<1.5, output_hygro_baserf, output_hygro_hybrid)
+    output_hygro = np.where(output_hygro<0, output_hygro_baserf, output_hygro)
+
+    return output_idx output_hygro               # returns 0 / 1
 
 # import data as numpy matrix from excel file
 def import_excel_matrix(path, i):
@@ -346,7 +391,7 @@ def copy_files(path,id):
 
 st.title('Hygro-Thermobarometer by Bo and Jagoutz 2024')
 
-tab_calc, tab_plgsat, tab_info = st.tabs(['**Calc**', '**Plg‑sat.**', '**Info**'])  # :contentReference[oaicite:0]{index=0}
+tab_calc, tab_plgsat, tab_info = st.tabs(['**Calc and Ranking**', '**Hybrid Plg‑sat. Liq Hygrometer**', '**Info**'])  # :contentReference[oaicite:0]{index=0}
 
 with tab_calc:
     st.write(
@@ -481,12 +526,16 @@ with tab_plgsat:
             save_excel(X, 0, dl_path)
             
             # 5) run the two classifiers
-            out_rf   = run_plgsat_classifier(X).reshape(-1, 1)
-            out_poly = inpoly_detector(X).reshape(-1, 1)
+      
+            out_hygro_hybrid, out_hygro_idxplgsat = run_hybrid_hygrometer(X)
+            out_hygro_hybrid = out_hygro_hybrid.reshape(-1, 1)
+            out_hygro_idxplgsat = out_hygro_idxplgsat.reshape(-1, 1)
+
+            # out_poly = inpoly_detector(X).reshape(-1, 1)
             
             # 6) append the results to the workbook
-            save_excel(out_rf,   X_wid,     dl_path)
-            save_excel(out_poly, X_wid + 1, dl_path)
+            save_excel(out_hygro_hybrid,   X_wid,     dl_path)
+            save_excel(out_hygro_idxplgsat, X_wid + 1, dl_path)
     
     
             st.success('***Calculation is complete***')
