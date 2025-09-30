@@ -527,7 +527,7 @@ with tab_plgsat:
             
             # 5) run the two classifiers
       
-            out_hygro_hybrid, out_hygro_idxplgsat = run_hybrid_hygrometer(X)
+            out_hygro_idxplgsat, out_hygro_hybrid = run_hybrid_hygrometer(X)
             out_hygro_hybrid = out_hygro_hybrid.reshape(-1, 1)
             out_hygro_idxplgsat = out_hygro_idxplgsat.reshape(-1, 1)
 
