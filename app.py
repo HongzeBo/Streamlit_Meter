@@ -26,6 +26,66 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
+class TrendResidualForest(BaseEstimator, RegressorMixin):
+    """
+    Fit a polynomial trend model (using selected columns) + RandomForest on residuals.
+    - Trend: only using columns 2, 3, 4, 6 (0-based indices 1,2,3,5), polynomial degree=2
+    - RF: using all features
+    """
+    def __init__(
+        self,
+        trend_model=None,
+        rf_model=None,
+        store_residuals=False,
+    ):
+        self.trend_features = [1, 2, 3, 5]
+        default_trend = Pipeline([
+            ("poly",   PolynomialFeatures(degree=2, include_bias=False)),
+            ("scale",  StandardScaler()),
+            ("linreg", LinearRegression()),
+        ])
+        default_rf = RandomForestRegressor(
+            n_estimators=64,
+            min_samples_leaf=2,
+            random_state=42,
+            n_jobs=-1,
+        )
+        self.trend_model     = trend_model if trend_model is not None else default_trend
+        self.rf_model        = rf_model    if rf_model    is not None else default_rf
+        self.store_residuals = store_residuals
+
+    def fit(self, X, y):
+        X, y = check_X_y(X, y, dtype=float, multi_output=False)
+        self.n_features_in_ = X.shape[1]
+        self.trend_model_ = clone(self.trend_model)
+        self.rf_model_    = clone(self.rf_model)
+        X_trend = X[:, self.trend_features]
+        self.trend_model_.fit(X_trend, y)
+        residuals = y - self.trend_model_.predict(X_trend)
+        if self.store_residuals:
+            self.training_residuals_ = residuals
+        self.rf_model_.fit(X, residuals)
+        return self
+
+    def predict(self, X):
+        check_is_fitted(self, ["trend_model_", "rf_model_"])
+        X = check_array(X, dtype=float)
+        if X.shape[1] != self.n_features_in_:
+            raise ValueError(f"Expected {self.n_features_in_} features, got {X.shape[1]}")
+        X_trend = X[:, self.trend_features]
+        trend_pred = self.trend_model_.predict(X_trend)
+        resid_pred = self.rf_model_.predict(X)
+        return trend_pred + resid_pred
+
+    def get_params(self, deep=True):
+        out = super().get_params(deep=deep)
+        if deep:
+            out.update(**{f"trend_model__{k}": v
+                          for k, v in self.trend_model.get_params().items()})
+            out.update(**{f"rf_model__{k}": v
+                          for k, v in self.rf_model.get_params().items()})
+        return out
+
 # calibration range inpolygon detection
 def inpoly_detector(data_use: np.ndarray,
                     book: str = 'allexps_allpairs.xlsx',
