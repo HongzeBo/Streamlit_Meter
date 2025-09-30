@@ -17,6 +17,15 @@ import os
 import shutil 
 import dill
 
+from sklearn.base import BaseEstimator, RegressorMixin, clone
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+
 # calibration range inpolygon detection
 def inpoly_detector(data_use: np.ndarray,
                     book: str = 'allexps_allpairs.xlsx',
