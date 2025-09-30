@@ -104,7 +104,7 @@ def run_hybrid_hygrometer(X: np.ndarray) -> np.ndarray:
     output_hygro = np.where(output_hygro_baserf<1.5, output_hygro_baserf, output_hygro_hybrid)
     output_hygro = np.where(output_hygro<0, output_hygro_baserf, output_hygro)
 
-    return output_idx output_hygro               # returns 0 / 1
+    return output_idx, output_hygro               # returns 0 / 1
 
 # import data as numpy matrix from excel file
 def import_excel_matrix(path, i):
