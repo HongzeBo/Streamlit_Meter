@@ -64,7 +64,7 @@ def inpoly_detector(data_use: np.ndarray,
 
 def run_hybrid_hygrometer(X: np.ndarray) -> np.ndarray:
     with open(r'hybrid0616/hybrid_hygro_afterplgin.dill','rb') as f:
-    rf_use_hygro_hybrid = dill.load(f)
+        rf_use_hygro_hybrid = dill.load(f)
     rf_use_hygro_baserf = joblib.load(r'hybrid0616/hybrid_hygro_baserf')
     rf_use_plgsat = joblib.load(r'hybrid0616/hybrid_plg-classifier') 
 
