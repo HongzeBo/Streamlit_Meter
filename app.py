@@ -538,11 +538,11 @@ with tab_calc:
 # ─────────────────────────────  “Plg‑sat.” TAB  ─────────────────────────────
 with tab_plgsat:
 
-    st.write("""
-    ***Before using the Liq-afterplgin hygrometer, two conditions must be met:***
-    ***1) Input liquid compositions must fall within the calibration range of our experimental data compilation.***
-    ***2) Input liquid compositions must be confirmed as Plag-saturated by our classification model (88.1% avg. accuracy).***
-    """)
+    # st.write("""
+    # ***Before using the Liq-afterplgin hygrometer, two conditions must be met:***
+    # ***1) Input liquid compositions must fall within the calibration range of our experimental data compilation.***
+    # ***2) Input liquid compositions must be confirmed as Plag-saturated by our classification model (88.1% avg. accuracy).***
+    # """)
 
     # ---------- Step1 – download template ------------------------------------
     st.subheader('***Step1: Please download the template***')
@@ -557,7 +557,7 @@ with tab_plgsat:
     upl_file = st.file_uploader('', type=['xlsx'])
     
     if upl_file:
-        st.subheader('***Step3: Testing whether the uploaded liquid composition is (1) Plag saturated and (2) within the calibration range of our experimental data***')
+        st.subheader('***Step3: Testing whether the uploaded liquid composition is Plag saturated and predict the H2O content***')
       
         import uuid, os
         sess_id = str(uuid.uuid4())
