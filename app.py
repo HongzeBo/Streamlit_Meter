@@ -528,7 +528,7 @@ with tab_plgsat:
             with open(r'hybrid0616/hybrid_hygro_afterplgin.dill','rb') as f:
                 rf_use_hygro_hybrid = dill.load(f)
             rf_use_hygro_baserf = joblib.load(r'hybrid0616/hybrid_hygro_baserf')
-            print(rf_use_hygro_hybrid.predict(X))
+            print(rf_use_hygro_baserf.predict(X))
             rf_use_plgsat = joblib.load(r'hybrid0616/hybrid_plg-classifier') 
 
             # classification of plg saturation results
@@ -560,20 +560,6 @@ with tab_plgsat:
             # output_mf = (rf_use_mf.predict(X)).reshape((length,1))
 
             # H2O results
-
-            import logging
-
-            # Put this near the top of app.py (once)
-            logging.basicConfig(
-                level=logging.DEBUG,  # or INFO
-                format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-            )
-
-            logger = logging.getLogger(__name__)
-
-            # later…
-            logger.debug("X shape: %s", getattr(X, "shape", None))
-            logger.debug("X sample: %s", X[:3] if hasattr(X, "__getitem__") else X)
 
             output_hygro_hybrid = rf_use_hygro_hybrid.predict(X)
 
