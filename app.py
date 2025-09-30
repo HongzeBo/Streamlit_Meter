@@ -523,44 +523,52 @@ with tab_plgsat:
             # 4) Save the input data first to the template copy
             save_excel(X, 0, dl_path)
             
-            # 5) run the two classifiers (use ONLY the first 10 oxides for the RF models)
+            # 5) run the two classifiers
+      
             with open(r'hybrid0616/hybrid_hygro_afterplgin.dill','rb') as f:
                 rf_use_hygro_hybrid = dill.load(f)
             rf_use_hygro_baserf = joblib.load(r'hybrid0616/hybrid_hygro_baserf')
-            rf_use_plgsat      = joblib.load(r'hybrid0616/hybrid_plg-classifier')
-
-            # models expect the 10-component liquid only
-            X10 = X[:, :10].astype(float)
-            length = X10.shape[0]
+            rf_use_plgsat = joblib.load(r'hybrid0616/hybrid_plg-classifier') 
 
             # classification of plg saturation results
-            output_plgsat_raw = rf_use_plgsat.predict(X10).reshape(length, 1)
+            output_plgsat_raw = rf_use_plgsat.predict(X)
+            length=len(X[:,0])
+            output_plgsat_raw =  output_plgsat_raw.reshape((length,1))
+            # print(output_plgsat_raw.shape)
 
-            # set MgO>=15 as non-Plg-sat; SiO2>60 as Plg-sat
-            mask = X10[:, 5:6] >= 15.0
-            output_plgsat_raw = np.where(mask, np.zeros((length, 1)), output_plgsat_raw)
+            # set Mg>=15 as non-Plg-sat, SiO2>60 data as Plg-sat
+            mask = X[:,5:6]>=15
+            output_plgsat_raw = np.where(mask, np.zeros((length,1)), output_plgsat_raw)
 
-            mask = X10[:, 0:1] >= 60.0
-            output_plgsat = np.where(mask, np.ones((length, 1)), output_plgsat_raw)
+            mask = X[:,0:1]>=60
+            output_plgsat = np.where(mask, np.ones((length,1)), output_plgsat_raw)
+            # print(output_plgsat.shape)
 
             # applicability, 50 < SiO2 < 80
-            mask = (X10[:, 0:1] <= 50.0) | (X10[:, 0:1] >= 80.0)
-            output_idx = np.where(mask, np.zeros((length, 1)), output_plgsat)
+            mask = (X[:,0:1]<=50) | (X[:,0:1]>=80)
+            output_idx = np.where(mask, np.zeros((length,1)), output_plgsat)
+            # print(output_idx.shape)
 
-            # H2O results (base RF when <1.5; otherwise hybrid; clip negatives back to base RF)
-            output_hygro_hybrid = rf_use_hygro_hybrid.predict(X10).reshape(length, 1)
-            output_hygro_baserf = rf_use_hygro_baserf.predict(X10).reshape(length, 1)
-            output_hygro = np.where(output_hygro_baserf < 1.5, output_hygro_baserf, output_hygro_hybrid)
-            output_hygro = np.where(output_hygro < 0, output_hygro_baserf, output_hygro)
+            # # temperature results
+            # output_thermo = (rf_use_thermo.predict(X)).reshape((length,1))
 
-            # ensure 2D for writing
-            output_hygro = output_hygro.reshape(-1, 1)
-            output_idx   = output_idx.reshape(-1, 1)
+            # # pressure results 
+            # output_baro = (rf_use_baro.predict(X)).reshape((length,1))
 
+            # # melt fraction results
+            # output_mf = (rf_use_mf.predict(X)).reshape((length,1))
+
+            # H2O results
+            output_hygro_hybrid = (rf_use_hygro_hybrid.predict(X)).reshape((length,1))
+            output_hygro_baserf = (rf_use_hygro_baserf.predict(X)).reshape((length,1))
+            output_hygro = np.where(output_hygro_baserf<1.5, output_hygro_baserf, output_hygro_hybrid)
+            output_hygro = np.where(output_hygro<0, output_hygro_baserf, output_hygro)
+
+            # out_poly = inpoly_detector(X).reshape(-1, 1)
+            
             # 6) append the results to the workbook
             save_excel(output_hygro,   X_wid,     dl_path)
-            save_excel(output_idx, X_wid + 1,     dl_path)
-
+            save_excel(output_idx, X_wid + 1, dl_path)
     
     
             st.success('***Calculation is complete***')
