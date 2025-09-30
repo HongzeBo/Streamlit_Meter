@@ -18,7 +18,7 @@ import shutil
 
 # calibration range inpolygon detection
 def inpoly_detector(data_use: np.ndarray,
-                    book: str = 'allexps_all.xlsx',
+                    book: str = 'allexps_allpairs.xlsx',
                     sheet_index: int = 2) -> np.ndarray:
     """
     Returns an int array (1 = inside polygon for all projections, 0 = outside).
@@ -28,7 +28,7 @@ def inpoly_detector(data_use: np.ndarray,
     data_use : np.ndarray
         Your sample matrix (rows × ≥9 cols).
     book : str
-        Path to allexps_all.xlsx (default assumes it sits beside app.py).
+        Path to allexps_allpairs.xlsx (default assumes it sits beside app.py).
     sheet_index : int
         Zero‑based index of the worksheet that holds the melt data.
         The third sheet ⇒ 2.
@@ -148,7 +148,7 @@ def main(input_file, model_file,id):
     model_index = data_name.index(model_name)
 
     # import experimental calibration data
-    input_file_exp = 'allexps_all.xlsx'
+    input_file_exp = 'allexps_allpairs.xlsx'
     data_exp = import_excel_matrix(input_file_exp, model_index)
 
     # set up plot parameters
