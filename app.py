@@ -653,8 +653,9 @@ with tab_plgsat:
 
 
 with tab_info:
-    col1, col2 = st.columns([6, 4])
-    with col1:
-        st.subheader('***Hongze Bo, Ben Klein, Oli Jagoutz. (2025) Effect of H2O on Magmatic Evolution Systematics. In preparation.***')
-    with col2:
-        st.image('dog.png')
+    st.subheader('***Hongze Bo, Ben Klein, Oli Jagoutz. (2025) Effect of H2O on Magmatic Evolution Systematics. In preparation.***')
+    # col1, col2 = st.columns([6, 4])
+    # with col1:
+    #     st.subheader('***Hongze Bo, Ben Klein, Oli Jagoutz. (2025) Effect of H2O on Magmatic Evolution Systematics. In preparation.***')
+    # with col2:
+    #     st.image('dog.png')
