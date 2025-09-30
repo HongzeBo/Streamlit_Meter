@@ -135,8 +135,8 @@ def main(input_file, model_file,id):
     save_excel(data, 0, output_file)
 
     # get all the model names
-    data_name = ['liq', 'liq-outolonly', 'liq-afterplgin', 'ol', 'cpx', 'plg', 'opx', 'amph', 'ilm', 'mag', 'sp', 'grt']
-    data_name_raw = ['liq', 'ol', 'cpx', 'plg', 'opx', 'amph', 'ilm', 'mag', 'sp', 'grt']
+  data_name = ['liq-olpyxspplgsat', 'liq-pyxspplgsat', 'liq-plgsat', 'ol', 'cpx', 'plg', 'opx', 'amph', 'ilm', 'mag', 'sp', 'grt']
+  data_name_raw = ['liq', 'ol', 'cpx', 'plg', 'opx', 'amph', 'ilm', 'mag', 'sp', 'grt']
     for i in range(10):
         for j in range(10):
             if j > i:
