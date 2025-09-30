@@ -95,8 +95,8 @@ def run_hybrid_hygrometer(X: np.ndarray) -> np.ndarray:
     # # pressure results 
     # output_baro = (rf_use_baro.predict(X)).reshape((length,1))
 
-    # melt fraction results
-    output_mf = (rf_use_mf.predict(X)).reshape((length,1))
+    # # melt fraction results
+    # output_mf = (rf_use_mf.predict(X)).reshape((length,1))
 
     # H2O results
     output_hygro_hybrid = (rf_use_hygro_hybrid.predict(X)).reshape((length,1))
