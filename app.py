@@ -560,6 +560,8 @@ with tab_plgsat:
 
             # H2O results
 
+            import logging
+            logging.log(1, f"X value: {X}")
             output_hygro_hybrid = rf_use_hygro_hybrid.predict(X)
             output_hygro_hybrid = output_hygro_hybrid.reshape((length,1))
             output_hygro_baserf = rf_use_hygro_baserf.predict(X)
