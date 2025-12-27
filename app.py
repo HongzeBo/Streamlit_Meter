@@ -481,10 +481,7 @@ with tab_calc:
 
     st.subheader('***Step 2: Which liquid/mineral pair do you want to use?***')
 
-    pairs_list = list(meter_rank['Pairs'])
-    if len(pairs_list) >= 4:
-        pairs_list.pop(3) 
-    question2 = st.selectbox('', pairs_list)
+    question2 = st.selectbox('', list(meter_rank['Pairs']))
     
     model_file = "rf_models_thermobarohygro/" + ex_model + "_" + question2
 
