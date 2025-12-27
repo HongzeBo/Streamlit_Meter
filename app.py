@@ -458,7 +458,7 @@ def copy_files(path,id):
 
 
 
-st.title('Hygro-Thermobarometer by Bo, Klein,and Jagoutz 2026')
+st.title('Hygro-Thermobarometer by Bo, Klein,and Jagoutz 2025')
 
 tab_calc, tab_plgsat, tab_info = st.tabs(['**Calc and Ranking**', '**Hybrid Plg‑sat. Liq Hygrometer**', '**Info**'])  # :contentReference[oaicite:0]{index=0}
 
@@ -653,7 +653,7 @@ with tab_plgsat:
 
 
 with tab_info:
-    st.subheader('***Hongze Bo, Ben Klein, Oli Jagoutz. (2025) Effect of H2O on Magmatic Evolution Systematics. In preparation.***')
+    st.subheader('***Hongze Bo, Ben Klein, Oli Jagoutz. (2025) Effect of H2O on Magmatic Evolution Systematics. Submitted.***')
     # col1, col2 = st.columns([6, 4])
     # with col1:
     #     st.subheader('***Hongze Bo, Ben Klein, Oli Jagoutz. (2025) Effect of H2O on Magmatic Evolution Systematics. In preparation.***')
