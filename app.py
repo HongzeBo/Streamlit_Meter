@@ -458,13 +458,13 @@ def copy_files(path,id):
 
 
 
-st.title('Hygro-Thermobarometer by Bo, Klein,and Jagoutz 2025')
+st.title('Hygro-Thermobarometer by Bo, Klein,and Jagoutz 2026')
 
 tab_calc, tab_plgsat, tab_info = st.tabs(['**Calc and Ranking**', '**Hybrid Plg‑sat. Liq Hygrometer**', '**Info**'])  # :contentReference[oaicite:0]{index=0}
 
 with tab_calc:
     st.write(
-        '***Ranking of all possible hygro-thermobarometer pairs. RMSE are averaged from 100 trials of calibration of 80% train data and 20% test data.***')
+        '***Performance of all possible hygro-thermobarometer pairs. RMSE are averaged from 100 trials of calibration of 80% train data and 20% test data.***')
     meter_rank = pd.read_excel('meter_rank.xlsx', sheet_name='Sheet1')
     # print(meter_rank)
     st.dataframe(meter_rank, hide_index=True)
