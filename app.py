@@ -458,7 +458,7 @@ def copy_files(path,id):
 
 
 
-st.title('Hygro-Thermobarometer by Bo, Klein,and Jagoutz 2025')
+st.title('Hygro-Thermobarometer by Bo, Klein, and Jagoutz (2025)')
 
 tab_calc, tab_plgsat, tab_info = st.tabs(['**Calc and Ranking**', '**Hybrid Plg‑sat. Liq Hygrometer**', '**Info**'])  # :contentReference[oaicite:0]{index=0}
 
