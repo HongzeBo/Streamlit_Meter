@@ -481,9 +481,14 @@ with tab_calc:
 
     st.subheader('***Step 2: Which liquid/mineral pair do you want to use?***')
 
-    question2 = st.selectbox('', list(meter_rank['Pairs']))
+    meter_rank_old = pd.read_excel('meter_rank_old.xlsx', sheet_name='Sheet1')
+    options_list = list(meter_rank['Pairs'])
+    old_pairs_list = list(meter_rank_old['Pairs'])
+    selected_value = st.selectbox(' ', options_list)
+    current_index = options_list.index(selected_value)
+    target_string = old_pairs_list[current_index]
     
-    model_file = "rf_models_thermobarohygro/" + ex_model + "_" + question2
+    model_file = "rf_models_thermobarohygro/" + ex_model + "_" + target_string
 
 
     # @st.cache_data
